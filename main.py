@@ -1,6 +1,5 @@
 import argparse
 import os
-
 import torch
 import torch.optim as optim
 from torchvision import datasets
@@ -21,7 +20,7 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
-parser.add_argument('--experiment', type=str, default='experiment_drop', metavar='E',
+parser.add_argument('--experiment', type=str, default='experiment', metavar='E',
                     help='folder where experiment outputs are located.')
 args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
@@ -46,17 +45,16 @@ val_loader = torch.utils.data.DataLoader(
 # Neural network and optimizer
 # We define neural net in model.py so that it can be reused by the evaluate.py script
 from model import Net
-
-model = Net()
+from model import Net2
+model = Net2()
+# model = PartialSSD300(n_classes=20)
 if use_cuda:
     print('Using GPU')
     model.cuda()
 else:
     print('Using CPU')
 
-# optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 optimizer = optim.Adam(model.parameters(), lr=args.lr)
-
 
 def train(epoch):
     model.train()
