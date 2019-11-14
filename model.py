@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-nclasses = 20 
+n_classes = 20
 
 class Net(nn.Module):
     def __init__(self):
@@ -15,7 +15,7 @@ class Net(nn.Module):
         self.conv3bis = nn.Conv2d(32, 64, kernel_size=4)
 
         self.fc1 = nn.Linear(576, 40)
-        self.fc2 = nn.Linear(40, nclasses)
+        self.fc2 = nn.Linear(40, n_classes)
 
         self.dropout_conv = nn.Dropout(0.35)
         self.dropout_lin = nn.Dropout(0.55)
@@ -60,10 +60,10 @@ class Net2(nn.Module):
         self.fc2 = nn.Linear(30, n_classes)
 
         self.dropoutconv1 = nn.Dropout2d(0.1)
-        self.dropoutconv2 = nn.Dropout2d(0.2)
-        self.dropoutconv3 = nn.Dropout2d(0.3)
+        self.dropoutconv2 = nn.Dropout2d(0.15)
+        self.dropoutconv3 = nn.Dropout2d(0.2)
 
-        self.dropoutdense1 = nn.Dropout2d(0.6)
+        self.dropoutdense1 = nn.Dropout2d(0.4)
 
     def forward(self, x):
 

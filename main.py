@@ -72,9 +72,9 @@ def train(epoch):
         correct = pred.eq(target.data.view_as(pred)).cpu().sum()
         accuracy = 100. * correct.item() / len(target)
         if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}, Acc: {:.1f}%'.format(
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\t Average Loss: {:.6f}, Acc: {:.1f}%'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader), loss.data.item(), accuracy))
+                       100. * batch_idx / len(train_loader), loss.data.item() / args.batch_size, accuracy))
 
 
 def validation():
