@@ -8,19 +8,19 @@ from torchvision import datasets
 parser = argparse.ArgumentParser(description='RecVis A3 training script')
 parser.add_argument('--data', type=str, default='bird_dataset', metavar='D',
                     help="folder where data is located. train_images/ and val_images/ need to be found in the folder")
-parser.add_argument('--batch-size', type=int, default=32, metavar='B',
-                    help='input batch size for training (default: 64)')
-parser.add_argument('--epochs', type=int, default=400, metavar='N',
-                    help='number of epochs to train (default: 10)')
+parser.add_argument('--batch-size', type=int, default=16, metavar='B',
+                    help='input batch size for training (default: 16)')
+parser.add_argument('--epochs', type=int, default=1000, metavar='N',
+                    help='number of epochs to train (default: 1000)')
 parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
-                    help='learning rate (default: 0.01)')
+                    help='learning rate (default: 0.001)')
 parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                     help='SGD momentum (default: 0.5)')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
-parser.add_argument('--experiment', type=str, default='experiment', metavar='E',
+parser.add_argument('--experiment', type=str, default='experiment3', metavar='E',
                     help='folder where experiment outputs are located.')
 args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
@@ -44,7 +44,6 @@ val_loader = torch.utils.data.DataLoader(
 
 # Neural network and optimizer
 # We define neural net in model.py so that it can be reused by the evaluate.py script
-from model import Net
 from model import Net2
 model = Net2()
 # model = PartialSSD300(n_classes=20)
@@ -58,6 +57,7 @@ optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
 def train(epoch):
     model.train()
+    avg_accuracy = 0
     for batch_idx, (data, target) in enumerate(train_loader):
         if use_cuda:
             data, target = data.cuda(), target.cuda()
@@ -71,11 +71,12 @@ def train(epoch):
         pred = output.data.max(1, keepdim=True)[1]
         correct = pred.eq(target.data.view_as(pred)).cpu().sum()
         accuracy = 100. * correct.item() / len(target)
+        avg_accuracy += accuracy
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\t Average Loss: {:.6f}, Acc: {:.1f}%'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.data.item() / args.batch_size, accuracy))
-
+    print("Average Training Accuracy: {:0.1f}%".format(avg_accuracy / len(train_loader) ))
 
 def validation():
     model.eval()
@@ -102,6 +103,7 @@ def validation():
 
 
 best_acc = 0
+ok_loss = 10
 best_loss = 10
 for epoch in range(1, args.epochs + 1):
     train(epoch)
@@ -114,10 +116,11 @@ for epoch in range(1, args.epochs + 1):
 
     elif curr_accuracy > best_acc and curr_loss < best_loss + 0.03:
         best_acc = curr_accuracy
-        best_loss = curr_loss
+        ok_loss = curr_loss
         torch.save(model.state_dict(), args.experiment + '/model_' + str(epoch) + 'BEST.pth')
     elif curr_loss < best_loss:
         best_loss = curr_loss
+        ok_loss = curr_loss
         torch.save(model.state_dict(), args.experiment + '/model_' + str(epoch) + 'BESTLoss.pth')
 
     print('\n')
