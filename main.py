@@ -10,7 +10,7 @@ parser.add_argument('--data', type=str, default='bird_dataset', metavar='D',
                     help="folder where data is located. train_images/ and val_images/ need to be found in the folder")
 parser.add_argument('--batch-size', type=int, default=16, metavar='B',
                     help='input batch size for training (default: 16)')
-parser.add_argument('--epochs', type=int, default=1000, metavar='N',
+parser.add_argument('--epochs', type=int, default=2000, metavar='N',
                     help='number of epochs to train (default: 1000)')
 parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                     help='learning rate (default: 0.001)')
@@ -58,6 +58,7 @@ optimizer = optim.Adam(model.parameters(), lr=args.lr)
 def train(epoch):
     model.train()
     avg_accuracy = 0
+    avg_loss = 0
     for batch_idx, (data, target) in enumerate(train_loader):
         if use_cuda:
             data, target = data.cuda(), target.cuda()
@@ -65,6 +66,7 @@ def train(epoch):
         output = model(data)
         criterion = torch.nn.CrossEntropyLoss(reduction='mean')
         loss = criterion(output, target)
+        avg_loss += loss
         loss.backward()
         optimizer.step()
 
@@ -76,7 +78,8 @@ def train(epoch):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\t Average Loss: {:.6f}, Acc: {:.1f}%'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.data.item() / args.batch_size, accuracy))
-    print("Average Training Accuracy: {:0.1f}%".format(avg_accuracy / len(train_loader) ))
+    print("Average Training Accuracy: {:0.1f}%".format(avg_accuracy / len(train_loader)))
+    print("Average Training Loss: {:0.6f}".format(avg_loss / len(train_loader.dataset)))
 
 def validation():
     model.eval()
@@ -106,6 +109,8 @@ best_acc = 0
 ok_loss = 10
 best_loss = 10
 for epoch in range(1, args.epochs + 1):
+    if epoch % 500 == 0:
+        optimizer = optim.Adam(model.parameters(), lr=args.lr*0.1)
     train(epoch)
     curr_accuracy, curr_loss = validation()
     model_file = args.experiment + '/model_' + str(epoch) + '.pth'
