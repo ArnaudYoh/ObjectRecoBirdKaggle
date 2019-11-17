@@ -8,19 +8,19 @@ from torchvision import datasets
 parser = argparse.ArgumentParser(description='RecVis A3 training script')
 parser.add_argument('--data', type=str, default='bird_dataset', metavar='D',
                     help="folder where data is located. train_images/ and val_images/ need to be found in the folder")
-parser.add_argument('--batch-size', type=int, default=16, metavar='B',
+parser.add_argument('--batch-size', type=int, default=8, metavar='B',
                     help='input batch size for training (default: 16)')
-parser.add_argument('--epochs', type=int, default=2000, metavar='N',
+parser.add_argument('--epochs', type=int, default=300, metavar='N',
                     help='number of epochs to train (default: 1000)')
-parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.0001, metavar='LR',
                     help='learning rate (default: 0.001)')
-parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
+parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                     help='SGD momentum (default: 0.5)')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
-parser.add_argument('--experiment', type=str, default='experiment3', metavar='E',
+parser.add_argument('--experiment', type=str, default='experimentl2', metavar='E',
                     help='folder where experiment outputs are located.')
 args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
@@ -45,15 +45,19 @@ val_loader = torch.utils.data.DataLoader(
 # Neural network and optimizer
 # We define neural net in model.py so that it can be reused by the evaluate.py script
 from model import Net2
-model = Net2()
-# model = PartialSSD300(n_classes=20)
+from transfer_model import ResNet18
+
+model = ResNet18()
+#model = Net2()
+
+
 if use_cuda:
     print('Using GPU')
     model.cuda()
 else:
     print('Using CPU')
 
-optimizer = optim.Adam(model.parameters(), lr=args.lr)
+optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
 def train(epoch):
     model.train()
@@ -108,9 +112,11 @@ def validation():
 best_acc = 0
 ok_loss = 10
 best_loss = 10
+lr = args.lr
 for epoch in range(1, args.epochs + 1):
-    if epoch % 500 == 0:
-        optimizer = optim.Adam(model.parameters(), lr=args.lr*0.1)
+    if epoch % 20 == 0:
+        lr *= 0.1
+        optimizer = optim.Adam(model.parameters(), lr=lr)
     train(epoch)
     curr_accuracy, curr_loss = validation()
     model_file = args.experiment + '/model_' + str(epoch) + '.pth'
