@@ -1,1 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
+/bird_dataset/
+/experiment*
+.idea/
+/.gitignore
+/inception_v3_iNat_299.ckpt
