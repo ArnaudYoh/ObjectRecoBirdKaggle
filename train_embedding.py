@@ -13,9 +13,9 @@ parser.add_argument('--data', type=str, default='bird_dataset_mix', metavar='D',
                     help="folder where data is located. train_images/ and val_images/ need to be found in the folder")
 parser.add_argument('--batch-size', type=int, default=16, metavar='B',
                     help='input batch size for training (default: 16)')
-parser.add_argument('--epochs', type=int, default=200, metavar='N',
+parser.add_argument('--epochs', type=int, default=300, metavar='N',
                     help='number of epochs to train (default: 1000)')
-parser.add_argument('--lr', type=float, default=0.00001, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                     help='learning rate (default: 0.001)')
 parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                     help='SGD momentum (default: 0.5)')
@@ -70,8 +70,8 @@ if use_cuda:
 else:
     print('Using CPU')
 
-# optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
-optimizer = optim.Adam(model.parameters(), lr=args.lr)
+optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+# optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
 def train(epoch):
     model.train()
@@ -134,8 +134,8 @@ for epoch in range(1, args.epochs + 1):
     # 50 gave superb results
     if epoch % 75 == 0:
         lr *= 0.1
-        # optimizer = optim.SGD(model.parameters(), lr=lr, momentum=args.momentum)
-        optimizer = optim.Adam(model.parameters(), lr=lr)
+        optimizer = optim.SGD(model.parameters(), lr=lr, momentum=args.momentum)
+        # optimizer = optim.Adam(model.parameters(), lr=lr)
     train(epoch)
     curr_accuracy, curr_loss = validation()
     model_file = args.experiment + '/model_' + str(epoch) + '.pth'

@@ -11,7 +11,7 @@ import torchvision.transforms.functional as transfun
 data_transforms = transforms.Compose([
     transforms.RandomVerticalFlip(),
     transforms.RandomHorizontalFlip(),
-    #transforms.RandomRotation(degrees=(0, 180), expand=True),
+    transforms.RandomRotation(degrees=(0, 180), expand=True),
     transforms.Resize((256, 256)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
